@@ -1,0 +1,90 @@
+# Workflow name
+name: Frontend Continuous Integration
+
+# Triggers for the workflow
+on:
+  # Manual trigger using the workflow_dispatch event
+  workflow_dispatch:
+
+  # Automatic trigger on push events to the main branch
+  push:
+    branches:
+      - main
+
+  # Automatic trigger on pull request events targeting the main branch
+  # pull_request:
+  #   branches:
+  #     - main
+
+  # Scheduled trigger at 5:00 AM UTC, Monday through Friday
+  # schedule:
+  #   - cron: '0 5 * * 1-5'
+
+# Jobs defined in the workflow
+jobs:
+  LINT:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js 
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+
+      # - name: Print a message for main branch
+      #   if: github.ref == 'refs/heads/main'
+      #   run: echo "This is the main branch."
+
+      # - name: Print a message for non-main branches
+      #   if: github.ref != 'refs/heads/main'
+      #   run: echo "This is not the main branch."
+
+      - name: Install dependencies
+        run: cd frontend && npm ci
+
+      - name: Lint
+        run: cd frontend && npm lint
+
+      # - name: Run tests
+      #   run: npm test
+
+      # - name: Debug message
+      #   if: env.DEBUG == 'true'
+      #   run: echo "Debugging is enabled."
+
+  TEST:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js 
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+
+      - name: Install dependencies
+        run: cd frontend && npm ci
+
+      - name: Run tests
+        run: cd frontend && npm test
+
+  BUILD:
+    needs: [LINT, TEST]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js 
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+
+      - name: Install dependencies
+        run: cd frontend && npm ci
+
+      - name: Run tests
+        run: cd frontend && npm test          
