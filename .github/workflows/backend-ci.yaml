@@ -1,0 +1,104 @@
+# Workflow name
+name: Backend Continuous Integration
+
+env:
+  # Set Node.js Version
+  PYTHON_VERSION: '3.10'
+
+# Triggers for the workflow
+on:
+  # Manual trigger using the workflow_dispatch event
+  workflow_dispatch:
+
+  # Automatic trigger on push events to the main branch
+  push:
+    branches:
+      - main
+
+  # Automatic trigger on pull request events targeting the main branch
+  # pull_request:
+  #   branches:
+  #     - main
+
+# Jobs defined in the workflow
+jobs:
+  LINT:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pipenv wheel
+      - id: cache-pipenv
+        uses: actions/cache@v1
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+
+      - name: Install dependencies
+        run: |
+          sudo mkdir /app 
+          sudo cp backend/Pipfile* /app
+          cd /app && pipenv install --dev
+
+      - name: Run Lint
+        run: |
+          sudo cp -r backend/* /app
+          cd /app && pipenv run lint-fail  
+
+  TEST:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pipenv wheel
+      - id: cache-pipenv
+        uses: actions/cache@v1
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+      - name: Install dependencies
+        run: |
+          sudo mkdir /app 
+          sudo cp backend/Pipfile* /app
+          cd /app && pipenv install --dev
+
+      - name: Run Tests
+        run: |
+          sudo cp -r backend/* /app
+          cd /app && pipenv run test 
+
+  BUILD:
+    needs: [LINT, TEST]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pipenv wheel
+      - id: cache-pipenv
+        uses: actions/cache@v1
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+      - name: Install and Build
+        run: |
+          sudo mkdir /app 
+          sudo cp backend/Pipfile* /app
+          cd /app && pipenv install --system --deploy
