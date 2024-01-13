@@ -469,3 +469,26 @@ kustomize build | kubectl apply -f -
 ## License
 
 [License](LICENSE.md)
+
+
+
+
+
+
+
+
+
+
+eksctl create cluster - name cluster-name \ 
+ - region region-name \
+ - node-type instance-type \
+ - nodes-min 2 \
+ - nodes-max 2
+For example
+eksctl create cluster - name Kubernetes-demo \
+ - region us-east-1 \
+ - node-type t3.micro
+
+
+ eksctl create cluster --name kubernetes-udacity-demo --region eu-west-2
+

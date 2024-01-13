@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: backend
-          image: backend
+          image: DOCKER_IMAGE
           ports:
             - containerPort: 5000
