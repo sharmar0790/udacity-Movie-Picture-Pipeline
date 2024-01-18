@@ -10,15 +10,9 @@ on:
   # Manual trigger using the workflow_dispatch event
   workflow_dispatch:
 
-  # Automatic trigger on push events to the main branch
-  push:
+  pull_request:
     branches:
       - main
-
-  # Automatic trigger on pull request events targeting the main branch
-  # pull_request:
-  #   branches:
-  #     - main
 
 # Jobs defined in the workflow
 jobs:

@@ -490,5 +490,7 @@ eksctl create cluster - name Kubernetes-demo \
  - node-type t3.micro
 
 
- eksctl create cluster --name kubernetes-udacity-demo --region eu-west-2
+eksctl create cluster --name kubernetes-udacity-demo --region eu-west-2
+
+eksctl create cluster --name kubernetes-udacity-demo --version 1.27 --region eu-west-2 --nodegroup-name standard-workers --node-type t3.micro --nodes 3 --nodes-min 2 --nodes-max 3 --managed
 
