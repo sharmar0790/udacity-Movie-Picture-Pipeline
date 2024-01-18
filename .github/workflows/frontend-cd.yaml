@@ -3,7 +3,6 @@ name: Frontend Continuous Deployment
 
 env:
   AWS_REGION: eu-west-2
-  # Set Node.js Version
   NODE_VERSION: '18.x'
   EKS_CLUSTER_NAME: kubernetes-udacity-demo
   IMAGE_TAG: 1.0.0
@@ -14,15 +13,9 @@ on:
   # Manual trigger using the workflow_dispatch event
   workflow_dispatch:
 
-  # Automatic trigger on push events to the main branch
   push:
     branches:
       - main
-
-  # Automatic trigger on pull request events targeting the main branch
-  # pull_request:
-  #   branches:
-  #     - main
 
 # Jobs defined in the workflow
 jobs:
