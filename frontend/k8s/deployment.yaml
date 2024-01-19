@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: DOCKER_IMAGE
+          image: frontend
+          # image: DOCKER_IMAGE
           ports:
             - containerPort: 3000
