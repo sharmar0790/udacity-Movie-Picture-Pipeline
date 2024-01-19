@@ -58,6 +58,7 @@ jobs:
 
   BUILD:
     needs: [LINT, TEST]
+    if: ${{ success() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

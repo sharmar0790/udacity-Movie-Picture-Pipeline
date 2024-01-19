@@ -5,7 +5,7 @@ env:
   AWS_REGION: eu-west-2
   PYTHON_VERSION: '3.10'
   EKS_CLUSTER_NAME: kubernetes-udacity-demo
-  IMAGE_TAG: 1.0.0
+  # IMAGE_TAG: 1.0.0
   ECR_REPOSITORY: udacity-backend-app
 
 # Triggers for the workflow
@@ -78,6 +78,7 @@ jobs:
 
   BUILD_PUBLISH_IMAGE:
     needs: [LINT, TEST]
+    if: ${{ success() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -99,8 +100,8 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           cd backend
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG  
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ vars.BACKEND_IMAGE_TAG }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ vars.BACKEND_IMAGE_TAG }}    
 
       - name: Update kube config
         run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION    
@@ -109,7 +110,12 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}        
         run: |
-          cd backend
-          sed -i.bak "s|DOCKER_IMAGE|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" k8s/deployment.yaml && \
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
+          cd backend/k8s
+          # sed -i.bak "s|DOCKER_IMAGE|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" k8s/deployment.yaml && \
+          # kubectl apply -f k8s/deployment.yaml
+          # kubectl apply -f k8s/service.yaml
+
+          kustomize edit set image backend=$ECR_REGISTRY/$ECR_REPOSITORY:${{ vars.BACKEND_IMAGE_TAG }}
+
+          # Apply the manifests to the cluster
+          kustomize build | kubectl apply -f - 
