@@ -5,7 +5,6 @@ env:
   AWS_REGION: eu-west-2
   NODE_VERSION: '18.x'
   EKS_CLUSTER_NAME: kubernetes-udacity-demo
-  # IMAGE_TAG: 1.0.0
   ECR_REPOSITORY: udacity-frontend-app
 
 # Triggers for the workflow
