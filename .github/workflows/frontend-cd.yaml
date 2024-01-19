@@ -5,7 +5,7 @@ env:
   AWS_REGION: eu-west-2
   NODE_VERSION: '18.x'
   EKS_CLUSTER_NAME: kubernetes-udacity-demo
-  IMAGE_TAG: 1.0.0
+  # IMAGE_TAG: 1.0.0
   ECR_REPOSITORY: udacity-frontend-app
 
 # Triggers for the workflow
@@ -61,6 +61,7 @@ jobs:
 
   BUILD_PUBLISH_IMAGE:
     needs: [LINT, TEST]
+    if: ${{ success() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -82,8 +83,8 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           cd frontend
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG    
+          docker build --build-arg=REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ vars.FRONTEND_IMAGE_TAG }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ vars.FRONTEND_IMAGE_TAG }}    
 
       - name: Update kube config
         run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION    
@@ -92,7 +93,8 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}        
         run: |
-          cd frontend
-          sed -i.bak "s|DOCKER_IMAGE|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" k8s/deployment.yaml && \
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml    
+          cd frontend/k8s
+          kustomize edit set image frontend=$ECR_REGISTRY/$ECR_REPOSITORY:${{ vars.FRONTEND_IMAGE_TAG }}
+
+          # Apply the manifests to the cluster
+          kustomize build | kubectl apply -f - 
